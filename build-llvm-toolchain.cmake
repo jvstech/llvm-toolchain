@@ -95,6 +95,8 @@ ${LLVM_PROJECT_REPO_URL}.")
   if (NOT "${gitResult}" STREQUAL "0")
     message(FATAL_ERROR "Error cloning LLVM source.")
   endif()
+  # Update SOURCE_DIR to refer to the 'llvm' subdirectory.
+  set(SOURCE_DIR "${SOURCE_DIR}/llvm")
 endif()
 
 # Adjust the directories and ensure they exist.
