@@ -11,20 +11,20 @@ validate(
     INSTALL_DIR
     LLVM_SOURCE_DIR)
 
-get_filename_component(srcDir "${LLVM_SOURCE_DIR}/../compiler-rt" ABSOLUTE)
+get_filename_component(srcDir "${LLVM_SOURCE_DIR}/../libcxx" ABSOLUTE)
 if (NOT IS_DIRECTORY "${srcDir}")
-  message(FATAL_ERROR "Compiler-RT source directory not found: ${srcDir}")
+  message(FATAL_ERROR "libc++ source directory not found: ${srcDir}")
 endif()
 
-ExternalProject_Add(compiler-rt
+ExternalProject_Add(libcxx
   SOURCE_DIR ${srcDir}
   CMAKE_GENERATOR Ninja
   CMAKE_ARGS
     -DROOT_DIR=${ROOT_DIR}
     -DINSTALL_DIR=${INSTALL_DIR}
-    -DLLVM_SOURCE_DIR=${LLVM_SOURCE_DIR}
     -DBOOTSTRAP_BIN_DIR=${BOOTSTRAP_BIN_DIR}
-    -C${CACHE_DIR}/compiler-rt-cache.cmake
+    -C${CACHE_DIR}/libcxx-cache.cmake
   DOWNLOAD_COMMAND ""
   TEST_COMMAND ""
-  DEPENDS llvm-bootstrap)
+  DEPENDS libcxxabi)
+  
