@@ -57,5 +57,5 @@ set_cache_variables(STRING
   VALUE OFF)
 
 set_cache(CLANG_DEFAULT_LINKER "lld")
-set_cache(LLVM_TARGETS_TO_BUILD "X86")
+set_cache(LLVM_TARGETS_TO_BUILD host)
 set_cache(LLVM_ENABLE_PROJECTS "clang;lld")
