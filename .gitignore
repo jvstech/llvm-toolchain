@@ -1,0 +1,6 @@
+# Exclude directories commonly created by the top-level build script.
+build/
+install/
+source/
+checkout/
+tools/
