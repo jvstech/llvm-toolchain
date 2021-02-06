@@ -31,12 +31,12 @@ function(set_cache_default varName value)
   set(${varName} ${value} CACHE ${argType} "" ${forceFlag})
 endfunction()
 
-# set_cache_variables - Sets multiple cache variables to the given value(s).
+# set_cache_variables - Sets multiple cache variables to the given value.
 function(set_cache_variables)
   cmake_parse_arguments(ARG
     "STRING;BOOL;FILEPATH;PATH"
-    ""
-    "VALUE;VARIABLES"
+    "VALUE"
+    "VARIABLES"
     ${ARGN})
   _get_cache_type(argType
     "${ARG_BOOL}" "${ARG_FILEPATH}" "${ARG_PATH}" "${ARG_STRING}")

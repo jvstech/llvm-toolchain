@@ -21,5 +21,4 @@ add_subdirectory(compiler-rt)
 add_subdirectory(libunwind)
 add_subdirectory(libcxxabi)
 add_subdirectory(libcxx)
-# TODO:
-# add_subdirectory(llvm)
+add_subdirectory(llvm)

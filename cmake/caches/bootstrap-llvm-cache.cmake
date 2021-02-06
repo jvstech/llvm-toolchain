@@ -5,6 +5,13 @@ find_program(ninjaExe ninja
   PATHS ${TOOLS_DIR}/ninja/bin
   REQUIRED)
 
+# Include the Compiler-RT cache values.
+include(${CMAKE_CURRENT_LIST_DIR}/compiler-rt-cache.cmake)
+unset(CMAKE_C_COMPILER CACHE)
+unset(CMAKE_CXX_COMPILER CACHE)
+unset(CMAKE_ASM_COMPILER CACHE)
+unset(LLVM_CONFIG_PATH CACHE)
+
 set_cache(CMAKE_BUILD_TYPE Release)
 set_cache(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bootstrap-llvm" PATH)
 set_cache(CMAKE_GENERATOR Ninja)
@@ -56,6 +63,15 @@ set_cache_variables(STRING
     LLVM_ENABLE_ZLIB
   VALUE OFF)
 
+# Ensure the standard library, runtime library, and unwinder are all set to the
+# platform defaults by clearing them.
+set_cache_variables(STRING
+  VARIABLES
+    CLANG_DEFAULT_CXX_STDLIB
+    CLANG_DEFAULT_RTLIB
+    CLANG_DEFAULT_UNWINDLIB
+  VALUE "")
+
 set_cache(CLANG_DEFAULT_LINKER "lld")
 set_cache(LLVM_TARGETS_TO_BUILD host)
-set_cache(LLVM_ENABLE_PROJECTS "clang;lld")
+set_cache(LLVM_ENABLE_PROJECTS "clang;compiler-rt;lld")
