@@ -1,5 +1,4 @@
 include(${CMAKE_CURRENT_LIST_DIR}/common-project-cache.cmake)
-include(Debug)
 
 enable_cache_variables(
   LLVM_ENABLE_ASSERTIONS
@@ -15,7 +14,6 @@ disable_cache_variables(
   LLVM_ENABLE_LIBPFM
   LLVM_ENABLE_LIBEDIT
   LLVM_ENABLE_TERMINFO
-  
 )
 
 set_cache_variables(STRING 
@@ -42,8 +40,3 @@ set_cache(CLANG_TABLEGEN "${BOOTSTRAP_BUILD_DIR}/bin/clang-tblgen" FILEPATH)
 set_cache(LLVM_ENABLE_PROJECTS "clang;clang-tools-extra;lld")
 set_cache(LLVM_TARGETS_TO_BUILD "all")
 set_cache(LLVM_TABLEGEN "${BOOTSTRAP_BUILD_DIR}/bin/llvm-tblgen" FILEPATH)
-
-#DEBUG
-set_cache(CMAKE_C_FLAGS "-v")
-dump_cmake_variables()
-#DEBUG
