@@ -107,6 +107,44 @@ file(MAKE_DIRECTORY "${TOOLS_DIR}")
 get_filename_component(installDirPath "${INSTALL_DIR}" ABSOLUTE)
 file(MAKE_DIRECTORY "${installDirPath}")
 
+# Configure and validate Windows cross-compile options -- if specified.
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  set_default(HOST_ARCH "x86_64")
+  message(STATUS "Windows build specified. Target architecture: ${HOST_ARCH}")
+  if (NOT DEFINED MSVC_BASE)
+  message(FATAL_ERROR 
+    "For Windows builds, MSVC_BASE must be defined and be an absolute path \
+to a folder containing MSVC headers and system libraries.")
+  endif()
+  if (NOT DEFINED WINSDK_BASE)
+    message(FATAL_ERROR 
+      "For Windows builds, WINSDK_BASE must be defined and be an absolute path \
+to a folder containing Windows SDK headers and system libraries.")
+  endif()
+  if (NOT DEFINED WINSDK_VER)
+    message(FATAL_ERROR
+      "For Windows builds, WINSDK_VER must be defined and set to the full \
+version number of the Windows SDK to use.")
+  endif()
+  if (NOT IS_DIRECTORY "${MSVC_BASE}")
+    message(FATAL_ERROR "MSVC_BASE directory not found: '${MSVC_BASE}'")
+  endif()
+  if (NOT IS_DIRECTORY "${WINSDK_BASE}")
+    message(FATAL_ERROR "WINSDK_BASE directory not found: '${WINSDK_BASE}'")
+  endif()
+  if (NOT IS_DIRECTORY "${WINSDK_BASE}/Lib/${WINSDK_VER}" OR 
+    NOT IS_DIRECTORY "${WINSDK_BASE}/Include/${WINSDK_VER}")
+    message(FATAL_ERROR 
+      "WINSDK_VER does not specify a valid Windows SDK version: ${WINSDK_VER}")
+  endif()
+  set(crossBuildArgs 
+    -DCMAKE_SYSTEM_NAME=Windows 
+    -DMSVC_BASE=${MSVC_BASE} 
+    -DWINSDK_BASE=${WINSDK_BASE} 
+    -DWINSDK_VER=${WINSDK_VER} 
+    -DHOST_ARCH=${HOST_ARCH})
+endif()
+
 # Start the configuration process.
 get_filename_component(sourceDirPath "${SOURCE_DIR}" ABSOLUTE)
 execute_process(
@@ -118,6 +156,7 @@ execute_process(
       -DNINJA_FORCE_BUILD=${NINJA_FORCE_BUILD}
       -DCMAKE_INSTALL_PREFIX=${installDirPath}
       -DINSTALL_DIR=${installDirPath}
+      ${crossBuildArgs}
       ${ROOT_DIR}/projects
   WORKING_DIRECTORY ${BUILD_DIR})
 

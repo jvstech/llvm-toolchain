@@ -5,6 +5,9 @@ find_program(ninjaExe ninja
   PATHS ${TOOLS_DIR}/ninja/bin
   REQUIRED)
 
+# Ensure we're building for the native system.
+set_cache(CMAKE_SYSTEM_NAME "${CMAKE_HOST_SYSTEM_NAME}")
+
 # Include the Compiler-RT cache values.
 include(${CMAKE_CURRENT_LIST_DIR}/compiler-rt-cache.cmake)
 unset(CMAKE_C_COMPILER CACHE)

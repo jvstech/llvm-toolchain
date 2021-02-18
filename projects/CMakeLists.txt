@@ -16,9 +16,14 @@ if (NINJA_EXECUTABLE-NOTFOUND OR NINJA_FORCE_BUILD)
   add_subdirectory(ninja)
 endif()
 
+message(STATUS "Build target: ${CMAKE_SYSTEM_NAME}")
+
 add_subdirectory(bootstrap-llvm)
-add_subdirectory(compiler-rt)
-add_subdirectory(libunwind)
-add_subdirectory(libcxxabi)
-add_subdirectory(libcxx)
+if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+  add_subdirectory(compiler-rt)
+  add_subdirectory(libunwind)
+  add_subdirectory(libcxxabi)
+  add_subdirectory(libcxx)
+endif()
+
 add_subdirectory(llvm)
