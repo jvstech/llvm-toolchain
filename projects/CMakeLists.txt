@@ -27,3 +27,4 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
 endif()
 
 add_subdirectory(llvm)
+add_subdirectory(scripts)

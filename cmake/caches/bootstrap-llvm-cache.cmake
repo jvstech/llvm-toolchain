@@ -15,6 +15,17 @@ unset(CMAKE_CXX_COMPILER CACHE)
 unset(CMAKE_ASM_COMPILER CACHE)
 unset(LLVM_CONFIG_PATH CACHE)
 
+# Set Clang's default values based on if we're reconfiguring.
+if (BOOTSTRAP_RECONFIGURING)
+  set_cache(CLANG_DEFAULT_CXX_STDLIB libc++)
+  set_cache(CLANG_DEFAULT_RTLIB compiler-rt)
+  set_cache(CLANG_DEFAULT_UNWINDLIB libunwind)
+else()
+  unset(CLANG_DEFAULT_CXX_STDLIB CACHE)
+  unset(CLANG_DEFAULT_RTLIB CACHE)
+  unset(CLANG_DEFAULT_UNWINDLIB CACHE)
+endif()
+
 set_cache(CMAKE_BUILD_TYPE Release)
 set_cache(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/bootstrap-llvm" PATH)
 set_cache(CMAKE_GENERATOR Ninja)

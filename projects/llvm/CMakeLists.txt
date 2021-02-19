@@ -16,9 +16,7 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   # Reconfigure and rebuild the bootstrapped version of Clang to use Compiler-RT,
   # libunwind, and libc++ by default.
   set(configArgs
-    -DCLANG_DEFAULT_CXX_STDLIB=libc++
-    -DCLANG_DEFAULT_RTLIB=compiler-rt
-    -DCLANG_DEFAULT_UNWINDLIB=libunwind)
+    -DBOOTSTRAP_RECONFIGURING=TRUE)
   add_custom_target(clang-stage2 ALL
     ${CMAKE_COMMAND} ${configArgs} ${LLVM_SOURCE_DIR}
     COMMAND ${CMAKE_COMMAND} --build .

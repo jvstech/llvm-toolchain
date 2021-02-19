@@ -15,6 +15,7 @@ ExternalProject_Add(llvm-bootstrap
   SOURCE_DIR ${LLVM_SOURCE_DIR}
   CMAKE_GENERATOR Ninja
   CMAKE_ARGS
+    -DBOOTSTRAP_RECONFIGURING=FALSE
     -DROOT_DIR=${ROOT_DIR}
     -DTOOLS_DIR=${TOOLS_DIR}
     -C${CACHE_DIR}/bootstrap-llvm-cache.cmake

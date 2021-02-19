@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# Default configuration script for Linux projects wishing to use Clang and LLVM.
+# This assumes the project source directory is in the current working directory
+# and named 'src' or 'checkout'. It also assumes the build directory should be
+# named 'build'.
+
+realPwd="$PWD"
+if [[ ! -z "$1" ]]; then
+  realPwd="$1"
+  if [[ ! -d "$realPwd" ]]; then
+    >&2 echo "Directory not found: $realPwd"
+    exit 1
+  fi
+  shift
+else
+  while [[ -f "$PWD/CMakeLists.txt" ]]; do
+    cd ..
+  done
+
+  realPwd="$PWD"
+fi
+
+echo "PWD: $realPwd"
+
+srcDir="$realPwd/src"
+if [[ ! -d "$srcDir" ]]; then
+  srcDir="$realPwd/checkout"
+  if [[ ! -d "$srcDir" ]]; then
+    >&2 echo "Source directory not found!"
+    exit 2
+  fi
+fi
+
+echo "Source directory: $srcDir"
+
+buildDir="$realPwd/build"
+mkdir -p $buildDir
+
+echo "Build directory: $buildDir"
+
+toolchainFile="@TOOLCHAIN_CMAKE_DIR@/linux-default-toolchain.cmake"
+if [[ -f "$realPwd/linux-toolchain.cmake" ]]; then
+  toolchainFile="$realPwd/linux-toolchain.cmake"
+fi
+
+echo "Toolchain file: $toolchainFile"
+
+cacheScript="@TOOLCHAIN_CMAKE_DIR@/linux-default-cache.cmake"
+if [[ -f "$realPwd/linux-cache.cmake" ]]; then
+  cacheScript="$realPwd/linux-cache.cmake"
+fi
+
+echo "Cache script: $cacheScript"
+
+(
+  cd $buildDir && \
+  cmake -GNinja -C$cacheScript -DCMAKE_TOOLCHAIN_FILE=$toolchainFile $srcDir
+  status=$?
+  exit "$status"
+) || exit $?

@@ -1,0 +1,30 @@
+# Cache script that can be used by default for projects. It assumes the 
+# project's install directory is named 'install' and that CMake's working 
+# directory path is a sibling of the project's install directory path.
+
+## There is probably a better way of getting the current working directory (such
+## as just reading the value of CMAKE_BINARY_DIR).
+#find_program(pythonPath python)
+#execute_process(COMMAND ${pythonPath} -c "import os; print(os.getcwd())"
+#  OUTPUT_VARIABLE pwd
+#  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+set(pwd "${CMAKE_BINARY_DIR}")
+
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+  set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
+endif()
+
+string(TOLOWER "${CMAKE_BUILD_TYPE}" buildType)
+string(TOLOWER "${CMAKE_HOST_SYSTEM_NAME}" systemName)
+set(tripleStr "${CMAKE_HOST_SYSTEM_PROCESSOR}-${systemName}-${buildType}")
+get_filename_component(installDir "${pwd}/../install" ABSOLUTE)
+set(CMAKE_INSTALL_PREFIX "${installDir}/${tripleStr}" CACHE PATH "" FORCE)
+
+# Setting these in the toolchain is not enough, apparently.
+set(CMAKE_GENERATOR Ninja CACHE STRING "" FORCE)
+set(CMAKE_MAKE_PROGRAM "@NINJA_BIN@" CACHE FILEPATH "" FORCE)
+
+# Set the DWARF version to 3 for better remote debugging from Visual Studio.
+set(CMAKE_C_FLAGS_DEBUG "-g -gdwarf-3" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_DEBUG "-g -gdwarf-3" CACHE STRING "" FORCE)

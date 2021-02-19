@@ -1,0 +1,6 @@
+# Toolchain file that can be used by default for projects that wish to use LLVM
+# and Clang to build.
+
+set(CMAKE_C_COMPILER @INSTALL_DIR@/bin/clang)
+set(CMAKE_CXX_COMPILER @INSTALL_DIR@/bin/clang++)
+set(CMAKE_MAKE_PROGRAM @NINJA_BIN@)
