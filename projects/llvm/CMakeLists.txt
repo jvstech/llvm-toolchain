@@ -22,7 +22,7 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     COMMAND ${CMAKE_COMMAND} --build .
     COMMAND ${CMAKE_COMMAND} --build . --target install
     WORKING_DIRECTORY ${BOOTSTRAP_BUILD_DIR}
-    DEPENDS libcxx
+    DEPENDS runtimes #libcxx
     COMMENT "Reconfiguring and rebuilding bootstrapped Clang to use just-built libraries by default")
   set(llvmDependsArg DEPENDS clang-stage2)
   set(crossBuildArgs -DBOOTSTRAP_BIN_DIR=${BOOTSTRAP_BIN_DIR})

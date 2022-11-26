@@ -10,7 +10,7 @@ validate(
     TOOLS_DIR)
 
 set_default(NINJA_REPO_URL "https://github.com/ninja-build/ninja")
-set_default(NINJA_VERSION "1.10.2")
+set_default(NINJA_VERSION "1.11.1")
 
 # Download the Ninja source code at configuration time.
 FetchContent_Declare(ninjasrc
