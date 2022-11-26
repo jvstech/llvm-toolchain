@@ -5,7 +5,12 @@ macro(set_default varName value)
 endmacro()
 
 set_default(LLVM_PROJECT_REPO_URL "https://github.com/llvm/llvm-project")
-set_default(LLVM_VERSION "11.0.1")
+set_default(LLVM_VERSION "15.0.5")
+option(USE_LLVM_MAIN_BRANCH "Use the main branch of the LLVM source repo")
+option(UPDATE_SOURCE
+  "Ensure the LLVM source is at the HEAD commit")
+option(FORCE_UPDATE_SOURCE
+  "Ensure the LLVM source is at the HEAD commit and discard local changes")
 
 set(ROOT_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -50,7 +55,7 @@ set(expectedLLVMSourceFiles
   cmake/platforms/WinMsvc.cmake)
 
 # Check to make sure the source directory exists and that some common, expected
-# files exist in it. 
+# files exist in it.
 check_dir_contents(sourceMatches ${SOURCE_DIR} ${expectedLLVMSourceFiles})
 if (NOT sourceMatches)
   # Check to see if the "llvm" subdirectory exists and try again.
@@ -75,12 +80,22 @@ endif()
 # Download the LLVM source code if required.
 if (downloadSource)
   message(STATUS "Source directory: ${SOURCE_DIR}")
-  message(
-    "The source directory either does not exist or does not appear to be a valid
-LLVM source tree. The source will need to be acquired from 
-${LLVM_PROJECT_REPO_URL}.")
+  message("The source directory either does not exist or does not appear to be"
+    "a valid LLVM source tree. The source will need to be acquired from"
+    "${LLVM_PROJECT_REPO_URL}.")
   if ("" STREQUAL "${GIT_EXECUTABLE}" OR NOT EXISTS "${GIT_EXECUTABLE}")
     find_program(GIT_EXECUTABLE git REQUIRED)
+  endif()
+
+  # Use the proper branch (either a tagged version, specific branch, or main).
+  if (NOT LLVM_BRANCH)
+    set(LLVM_BRANCH "llvmorg-${LLVM_VERSION}")
+    if (USE_LLVM_MAIN_BRANCH)
+      set(LLVM_BRANCH "main")
+      message(STATUS "Using the main branch from the LLVM source repo")
+    endif()
+  else()
+    message(STATUS "Using branch ${LLVM_BRANCH}")
   endif()
 
   message(STATUS "Found Git: ${GIT_EXECUTABLE}")
@@ -89,14 +104,62 @@ ${LLVM_PROJECT_REPO_URL}.")
   # (`cmake -P build-llvm-toolchian.cmake`) where FetchContent is unsupported.
   execute_process(COMMAND 
     ${GIT_EXECUTABLE} clone --depth 1 
-      --branch "llvmorg-${LLVM_VERSION}" "${LLVM_PROJECT_REPO_URL}.git" 
+      --branch "${LLVM_BRANCH}" "${LLVM_PROJECT_REPO_URL}.git" 
       "${SOURCE_DIR}"
-    RESULT_VARIABLE gitResult)
+    RESULT_VARIABLE gitResult)  
   if (NOT "${gitResult}" STREQUAL "0")
     message(FATAL_ERROR "Error cloning LLVM source.")
   endif()
   # Update SOURCE_DIR to refer to the 'llvm' subdirectory.
   set(SOURCE_DIR "${SOURCE_DIR}/llvm")
+endif()
+
+# Make sure the source is up-to-date, if requested.
+if ((UPDATE_SOURCE AND NOT USE_LLVM_MAIN_BRANCH) OR FORCE_UPDATE_SOURCE)
+  if (FORCE_UPDATE_SOURCE)
+    message(STATUS "Updating source and discarding any local changes ...")
+    # Grab the upstream branch.
+    execute_process(
+      COMMAND
+        ${GIT_EXECUTABLE} rev-parse --abbrev-ref --symbolic-full-name "@{u}"
+      OUTPUT_VARIABLE upstreamBranch
+      RESULT_VARIABLE gitResult
+      WORKING_DIRECTORY "${SOURCE_DIR}")
+    if (NOT "${gitResult}" STREQUAL "0")
+      message(FATAL_ERROR
+        "An error occurred while trying to determine the upstream branch.")
+    endif()
+    
+    # Fetch the latest refs.
+    execute_process(COMMAND
+      ${GIT_EXECUTABLE} fetch --all
+      RESULT_VARIABLE gitResult
+      WORKING_DIRECTORY "${SOURCE_DIR}")
+    if (NOT "${gitResult}" STREQUAL "0")
+      message(FATAL_ERROR
+        "An error occurred while trying to fetch latest refs.")
+    endif()
+
+    # Jump to the latest commit.
+    execute_process(COMMAND
+      ${GIT_EXECUTABLE} reset --hard "${upstreamBranch}"
+      RESULT_VARIABLE gitResult
+      WORKING_DIRECTORY "${SOURCE_DIR}")
+    if (NOT "${gitResult}" STREQUAL "0")
+      message(FATAL_ERROR
+        "An error occurred while trying to update the source.")
+    endif()
+  else()
+    # Perform a simple git pull, but don't die if it fails.
+    execute_process(COMMAND
+      ${GIT_EXECUTABLE} pull
+      RESULT_VARIABLE gitResult
+      WORKING_DIRECTORY "${SOURCE_DIR}")
+    if (NOT "${gitResult}" STREQUAL "0")
+      message(WARNING
+        "There was a problem updating the source.")
+    endif()
+  endif()
 endif()
 
 # Adjust the directories and ensure they exist.
@@ -113,18 +176,18 @@ if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   message(STATUS "Windows build specified. Target architecture: ${HOST_ARCH}")
   if (NOT DEFINED MSVC_BASE)
   message(FATAL_ERROR 
-    "For Windows builds, MSVC_BASE must be defined and be an absolute path \
-to a folder containing MSVC headers and system libraries.")
+    "For Windows builds, MSVC_BASE must be defined and be an absolute path"
+    "to a folder containing MSVC headers and system libraries.")
   endif()
   if (NOT DEFINED WINSDK_BASE)
     message(FATAL_ERROR 
-      "For Windows builds, WINSDK_BASE must be defined and be an absolute path \
-to a folder containing Windows SDK headers and system libraries.")
+      "For Windows builds, WINSDK_BASE must be defined and be an absolute path"
+      "to a folder containing Windows SDK headers and system libraries.")
   endif()
   if (NOT DEFINED WINSDK_VER)
     message(FATAL_ERROR
-      "For Windows builds, WINSDK_VER must be defined and set to the full \
-version number of the Windows SDK to use.")
+      "For Windows builds, WINSDK_VER must be defined and set to the full"
+      "version number of the Windows SDK to use.")
   endif()
   if (NOT IS_DIRECTORY "${MSVC_BASE}")
     message(FATAL_ERROR "MSVC_BASE directory not found: '${MSVC_BASE}'")
