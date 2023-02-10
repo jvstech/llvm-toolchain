@@ -1,6 +1,11 @@
 # Exclude directories commonly created by the top-level build script.
-build/
-install/
-source/
-checkout/
-tools/
+build
+build_windows
+install
+install_windows
+source
+checkout
+tools
+windows
+
+update.sh

@@ -174,38 +174,46 @@ file(MAKE_DIRECTORY "${installDirPath}")
 if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set_default(HOST_ARCH "x86_64")
   message(STATUS "Windows build specified. Target architecture: ${HOST_ARCH}")
-  if (NOT DEFINED MSVC_BASE)
-  message(FATAL_ERROR 
-    "For Windows builds, MSVC_BASE must be defined and be an absolute path"
-    "to a folder containing MSVC headers and system libraries.")
+  if (DEFINED WINDOWS_SYSROOT AND NOT DEFINED LLVM_WINSYSROOT)
+    set(LLVM_WINSYSROOT "${WINDOWS_SYSROOT}")
   endif()
-  if (NOT DEFINED WINSDK_BASE)
-    message(FATAL_ERROR 
-      "For Windows builds, WINSDK_BASE must be defined and be an absolute path"
-      "to a folder containing Windows SDK headers and system libraries.")
-  endif()
-  if (NOT DEFINED WINSDK_VER)
+  if (NOT DEFINED LLVM_WINSYSROOT AND NOT DEFINED WINDOWS_SYSROOT)
     message(FATAL_ERROR
-      "For Windows builds, WINSDK_VER must be defined and set to the full"
-      "version number of the Windows SDK to use.")
+      "For Windows builds, LLVM_WINSYSROOT must be defined and specify the path to a folder"
+      "containing the 'VC/Tools/MSVC/<MSVC-base-version>' and 'Windows Kits/10' folders.")
   endif()
-  if (NOT IS_DIRECTORY "${MSVC_BASE}")
-    message(FATAL_ERROR "MSVC_BASE directory not found: '${MSVC_BASE}'")
+  if (NOT IS_DIRECTORY "${LLVM_WINSYSROOT}")
+    message(FATAL_ERROR "LLVM_WINSYSROOT directory not found: '${LLVM_WINSYSROOT}'")
   endif()
-  if (NOT IS_DIRECTORY "${WINSDK_BASE}")
-    message(FATAL_ERROR "WINSDK_BASE directory not found: '${WINSDK_BASE}'")
+  if (NOT IS_DIRECTORY "${LLVM_WINSYSROOT}/VC/Tools/MSVC")
+    message(FATAL_ERROR "MSVC base directory not found: '${LLVM_WINSYSROOT}/VC/Tools/MSVC'")
   endif()
-  if (NOT IS_DIRECTORY "${WINSDK_BASE}/Lib/${WINSDK_VER}" OR 
-    NOT IS_DIRECTORY "${WINSDK_BASE}/Include/${WINSDK_VER}")
-    message(FATAL_ERROR 
-      "WINSDK_VER does not specify a valid Windows SDK version: ${WINSDK_VER}")
+  if (MSVC_VER AND NOT IS_DIRECTORY "${LLVM_WINSYSROOT}/VC/Tools/MSVC/${MSVC_VER}")
+    message(FATAL_ERROR "MSVC_VER does not specify a valid MSVC version: ${MSVC_VER}")
   endif()
+  if (NOT IS_DIRECTORY "${LLVM_WINSYSROOT}/Windows Kits/10")
+    message(FATAL_ERROR "Windows SDK directory not found: '${LLVM_WINSYSROOT}/Windows Kits/10'")
+  endif()
+  if (WINSDK_VER)
+    if (NOT IS_DIRECTORY "${LLVM_WINSYSROOT}/Windows Kits/10/Include/${WINSDK_VER}" OR
+        NOT IS_DIRECTORY "${LLVM_WINSYSROOT}/Windows Kits/10/Lib/${WINSDK_VER}")
+      message(FATAL_ERROR 
+        "WINSDK_VER does not specify a valid Windows SDK version: ${WINSDK_VER}")
+    endif()
+  endif()
+  
   set(crossBuildArgs 
     -DCMAKE_SYSTEM_NAME=Windows 
-    -DMSVC_BASE=${MSVC_BASE} 
-    -DWINSDK_BASE=${WINSDK_BASE} 
-    -DWINSDK_VER=${WINSDK_VER} 
+    -DLLVM_WINSYSROOT=${LLVM_WINSYSROOT} 
     -DHOST_ARCH=${HOST_ARCH})
+  if (MSVC_VER)
+    set(crossBuildArgs ${crossBuildArgs} 
+      -DMSVC_VER=${MSVC_VER})
+  endif()
+  if (WINSDK_VER)
+    set(crossBuildArgs ${crossBuildArgs} 
+      -DWINSDK_VER=${WINSDK_VER})
+  endif()
 endif()
 
 # Start the configuration process.
