@@ -30,18 +30,22 @@ else()
   validate(
     HAS_VALUE
       HOST_ARCH
-      WINSDK_VER
     EXISTS
-      MSVC_BASE
-      WINSDK_BASE)
+      LLVM_WINSYSROOT)
   set(crossBuildArgs 
     -DCMAKE_SYSTEM_NAME=Windows 
     -DCMAKE_TOOLCHAIN_FILE=${LLVM_SOURCE_DIR}/cmake/platforms/WinMsvc.cmake 
     -DLLVM_NATIVE_TOOLCHAIN=${BOOTSTRAP_INSTALL_DIR} 
-    -DMSVC_BASE=${MSVC_BASE} 
-    -DWINSDK_BASE=${WINSDK_BASE} 
-    -DWINSDK_VER=${WINSDK_VER} 
+    -DLLVM_WINSYSROOT=${LLVM_WINSYSROOT} 
     -DHOST_ARCH=${HOST_ARCH})
+  if (MSVC_VER)
+    set(crossBuildArgs ${crossBuildArgs} 
+      -DMSVC_VER=${MSVC_VER})
+  endif()
+  if (WINSDK_VER)
+    set(crossBuildArgs ${crossBuildArgs} 
+      -DWINSDK_VER=${WINSDK_VER})
+  endif()
 endif()
 
 # Now configure and build the final version of Clang/LLVM.

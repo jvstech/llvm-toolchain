@@ -46,5 +46,9 @@ if (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
   set_cache(CLANG_DEFAULT_UNWINDLIB "libunwind")
 else()
   set_cache(CMAKE_AR "${BOOTSTRAP_BUILD_DIR}/bin/llvm-lib" FILEPATH)
+  # FIXME: BLAKE3 can't yet be cross-compiled via assembler for Windows, apparently. So to work 
+  # around that, we set LLVM_DISABLE_ASSEMBLY_FILES which is (currently) only used by the BLAKE3
+  # CMakeLists.txt.
+  enable_cache_variables(LLVM_DISABLE_ASSEMBLY_FILES)
 endif()
 
