@@ -5,7 +5,7 @@ macro(set_default varName value)
 endmacro()
 
 set_default(LLVM_PROJECT_REPO_URL "https://github.com/llvm/llvm-project")
-set_default(LLVM_VERSION "16.0.2")
+set_default(LLVM_VERSION "16.0.5")
 option(USE_LLVM_MAIN_BRANCH "Use the main branch of the LLVM source repo")
 option(UPDATE_SOURCE
   "Ensure the LLVM source is at the HEAD commit")
